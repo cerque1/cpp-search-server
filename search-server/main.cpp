@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <numeric>
 #include <map>
 #include <set>
 #include <string>
@@ -10,6 +11,7 @@
 using namespace std;
 
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
+const double EPSILON = 1e-6;
 
 string ReadLine() {
     string s;
@@ -82,11 +84,9 @@ public:
 
         sort(matched_documents.begin(), matched_documents.end(),
              [](const Document& lhs, const Document& rhs) {
-                 if (abs(lhs.relevance - rhs.relevance) < 1e-6) {   
-                     return lhs.rating > rhs.rating;
-                 } else {
-                     return lhs.relevance > rhs.relevance;
-                 }
+                if (abs(lhs.relevance - rhs.relevance) < EPSILON)   
+                    return lhs.rating > rhs.rating;
+                return lhs.relevance > rhs.relevance;
              });
         if (matched_documents.size() > MAX_RESULT_DOCUMENT_COUNT) {
             matched_documents.resize(MAX_RESULT_DOCUMENT_COUNT);
@@ -94,8 +94,14 @@ public:
         return matched_documents;
     }
 
-    vector<Document> FindTopDocuments(const string& raw_query) const {
+    /*vector<Document> FindTopDocuments(const string& raw_query) const {
         return FindTopDocuments(raw_query, DocumentStatus::ACTUAL);
+    }*/
+
+    vector<Document> FindTopDocuments(const string& raw_query, DocumentStatus enter_status = DocumentStatus::ACTUAL) const {
+        return FindTopDocuments(raw_query, [enter_status](int document_id, DocumentStatus status, int rating){
+            return status == enter_status; 
+        });
     }
 
     int GetDocumentCount() const {
@@ -154,10 +160,8 @@ private:
         if (ratings.empty()) {
             return 0;
         }
-        int rating_sum = 0;
-        for (const int rating : ratings) {
-            rating_sum += rating;
-        }
+        int rating_sum = accumulate(ratings.begin(), ratings.end(), 0);
+        
         return rating_sum / static_cast<int>(ratings.size());
     }
 
@@ -211,14 +215,8 @@ private:
             }
             const double inverse_document_freq = ComputeWordInverseDocumentFreq(word);
             for (const auto &[document_id, term_freq] : word_to_document_freqs_.at(word)) {
-                if constexpr (is_same_v<Type, DocumentStatus>){
-                    if(documents_.at(document_id).status == search_criteria)
-                        document_to_relevance[document_id] += term_freq * inverse_document_freq;
-                }
-                else{
-                    if (search_criteria(document_id, documents_.at(document_id).status, documents_.at(document_id).rating)) 
-                        document_to_relevance[document_id] += term_freq * inverse_document_freq;
-                }
+                if (search_criteria(document_id, documents_.at(document_id).status, documents_.at(document_id).rating)) 
+                    document_to_relevance[document_id] += term_freq * inverse_document_freq;
             }
         }
 
