@@ -148,8 +148,6 @@ public:
         const Query query = ParseQuery(raw_query);
         vector<string> matched_words;
         for (const string& word : query.plus_words) {
-            if(!HasNoSpecialSymbol(word)) 
-                throw invalid_argument("Запрос содержит недопустимые требования"s);
             if (word_to_document_freqs_.count(word) == 0) {
                 continue;
             }
@@ -158,8 +156,6 @@ public:
             }
         }
         for (const string& word : query.minus_words) {
-            if(!IsValidWord(word)) 
-                throw invalid_argument("Минус-слово не соответствует требованиям"s);
             if (word_to_document_freqs_.count(word) == 0) {
                 continue;
                 }
