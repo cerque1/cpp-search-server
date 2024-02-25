@@ -7,7 +7,7 @@
 #include "search_server.h"
 #include "string_processing.h" 
 
-using namespace std::string_literals;
+using namespace std;
 
 std::ostream& operator<<(std::ostream& out, const Document& doc){
     std::cout << "{ document_id = " << doc.id << ", relevance = " << doc.relevance << ", rating = " << doc.rating << " }";
