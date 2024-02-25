@@ -33,10 +33,10 @@ std::vector<Document> RequestQueue::AddFindRequest(const std::string& raw_query,
     std::vector<Document> documents = search_server_.FindTopDocuments(raw_query, document_predicate);
     if(time_ == min_in_day_){
         requests_.pop_front();
-        requests_.push_back(QueryResult({time_, documents.size()}));
+        requests_.push_back(QueryResult(time_, documents.size()));
     }
     else if(time_ < min_in_day_){
-        requests_.push_back(QueryResult({time_, documents.size()}));
+        requests_.push_back(QueryResult(time_, documents.size()));
         time_++;
     }
     return documents;
