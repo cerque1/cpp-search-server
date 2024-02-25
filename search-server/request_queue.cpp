@@ -15,8 +15,8 @@ std::vector<Document> RequestQueue::AddFindRequest(const std::string& raw_query)
 
 int RequestQueue::GetNoResultRequests() const {
     return count_if(requests_.begin(), requests_.end(), [](const QueryResult& res){
-        return res.results_.second == 0;
+        return res.count_results_ == 0;
     });
 }
 
-RequestQueue::QueryResult::QueryResult(const std::pair<int, int>& results) : results_(results){}
+RequestQueue::QueryResult::QueryResult(int time_result, int count_results) : time_result_(time_result), count_results_(count_results){}
